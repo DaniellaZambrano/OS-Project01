@@ -1,4 +1,4 @@
-CC = gcc
+CC = g++
 VERSION = -std=c++11
 
 test_json.o: json.hpp test_json.cpp
