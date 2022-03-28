@@ -1,6 +1,8 @@
 {
     "station_1": {
-        "lambda_1": 0.05
+        "lambda_1": 0.05,
+        "mean_1": 5.0,
+        "deviation_1": 2.0
     },
     "queues": {
         "cadena_0": "cadena_0"

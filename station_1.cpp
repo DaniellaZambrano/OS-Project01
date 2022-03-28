@@ -33,6 +33,19 @@ std::exponential_distribution<double> get_exponential_object(double lambda) {
     return distribution;
 }
 
+/**
+ * @brief Returns the normal distribution object based on the mean m1 and the 
+ *      deviation d1
+ * 
+ * @param m1 
+ * @param d1 
+ * @return std::normal_distribution<double> 
+ */
+std::normal_distribution<double> get_normal_dist_object(double m1, double d1) {
+    std::normal_distribution<double> distribution(m1, d1);
+    return distribution;
+}
+
 
 /**
  * @brief This function will be executed concurrently to simulate
@@ -61,11 +74,9 @@ int main()
     json config;
     i >> config;
 
-    // Create messages queue 
+    // Create queue for CADENA_0
     key_t key;
     int msgid;
-  
-    // ftok to generate unique key
     std::cout << "[ESTACION 1] Creando cola de arrivo de nuevos vehículos 1\n";
     std::string queue_name = config["queues"]["cadena_0"];
     int n = queue_name.length();
@@ -74,10 +85,36 @@ int main()
     key = ftok(char_array, 65);
     msgid = msgget(key, 0666 | IPC_CREAT);
 
+    // Create thread to PUT new cars in the queue
     std::cout << "[ESTACION 1] Valor de lambda: " << config["station_1"]["lambda_1"] << std::endl;
-    std::exponential_distribution<double> exp = get_exponential_object(config["station_1"]["lambda_1"]);
+    std::exponential_distribution<double> exp = get_exponential_object(
+        config["station_1"]["lambda_1"]
+        );
     std::thread t1(new_cars_simulator, exp, msgid);
-    t1.join();
+    t1.detach();
+
+    // POP cars from the queue
+    std::cout << "[ESTACION 1] Valor de media M1: " << config["station_1"]["mean_1"] << std::endl;
+    std::cout << "[ESTACION 1] Valor de desviacion estandard D1: " << config["station_1"]["deviation_1"] << std::endl;
+    std::normal_distribution<double> norm = get_normal_dist_object(
+        config["station_1"]["mean_1"], config["station_1"]["deviation_1"]
+    );
+
+
+    ProductionCard pcard; 
+    while (true)
+    {
+        size_t data = msgrcv(msgid, &pcard, sizeof(pcard), 0, 0);
+        if (data == 0) {
+            std::cout << "[ESTACION 1] No hay vehículos en cola. " << std::endl;
+        }
+        else {
+            std::cout << "[ESTACION 1] Nuevo automovil entrando a producción " << std::endl;
+        }
+        std::chrono::duration<double> period ( 10 );
+        std::this_thread::sleep_for( period );
+    }
     
+
     return 0;
 }
