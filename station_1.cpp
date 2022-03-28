@@ -57,11 +57,12 @@ void new_cars_simulator(std::exponential_distribution<double> exp, int queue_id)
     int seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator (seed);
     while (true){
-        std::cout << "[ESTACION 1] Asignando nueva vehículo para producción\n";
+        std::cout << "[ESTACION 1] Asignando nueva vehículo para producción.\n";
         ProductionCard car;
         msgsnd(queue_id, &car, sizeof(car), 0);
         double number = exp(generator);
         std::chrono::duration<double> period ( number );
+        std::cout << "[ESTACION 1] Tiempo estimado para nueva llegada: " << period.count() << std::endl;
         std::this_thread::sleep_for( period );
     } 
 }
@@ -107,12 +108,23 @@ int main()
         size_t data = msgrcv(msgid, &pcard, sizeof(pcard), 0, 0);
         if (data == 0) {
             std::cout << "[ESTACION 1] No hay vehículos en cola. " << std::endl;
+            continue;
         }
         else {
+            int seed = std::chrono::system_clock::now().time_since_epoch().count();
+            std::default_random_engine generator (seed);
             std::cout << "[ESTACION 1] Nuevo automovil entrando a producción " << std::endl;
+            double number = exp(generator);
+            std::chrono::duration<double> period ( number );
+            std::cout << "[ESTACION 1] Procesando chasis y asignando identificador al automóvil. Tiempo estimado " << period.count() << std::endl;
+
+            std::this_thread::sleep_for( period );
+            pcard.car_id = 1;
+            
+            std::cout << "[ESTACION 1] Enviando automóvil " << pcard.car_id << " a la siguiente estación..." << std::endl;
+            
         }
-        std::chrono::duration<double> period ( 10 );
-        std::this_thread::sleep_for( period );
+
     }
     
 
