@@ -1,0 +1,9 @@
+{
+    "station_1": {
+        "lambda_1": 0.05
+    },
+    "queues": {
+        "cadena_0": "cadena_0"
+    }
+   
+}
