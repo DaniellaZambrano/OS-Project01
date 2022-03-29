@@ -110,7 +110,6 @@ int main()
         size_t data = msgrcv(msgid, &pcard, sizeof(pcard), 0, 0);
         if (data == 0) {
             std::cout << "[ESTACION 1] No hay vehículos en cola. " << std::endl;
-            std::cout << "[ESTACION 1] No hay vehículos en cola. " << std::endl;
             std::this_thread::sleep_for(500ms);
             continue;
         }
