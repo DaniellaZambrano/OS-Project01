@@ -1,5 +1,5 @@
 CC = g++
-VERSION = -std=c++11
+VERSION = -std=c++14
 
 station_1: station_1.cpp json.hpp
 	$(CC) $(VERSION) -I. station_1.cpp -o station_1.sh

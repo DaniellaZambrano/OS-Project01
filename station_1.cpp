@@ -21,6 +21,7 @@
 
 
 using json = nlohmann::json;
+using namespace std::chrono_literals;
 
 /**
  * @brief Returns the exponential distribution object based on the input lambda.
@@ -101,6 +102,7 @@ int main()
         config["station_1"]["mean_1"], config["station_1"]["deviation_1"]
     );
 
+    int car_id_counter{0};
 
     ProductionCard pcard; 
     while (true)
@@ -108,6 +110,8 @@ int main()
         size_t data = msgrcv(msgid, &pcard, sizeof(pcard), 0, 0);
         if (data == 0) {
             std::cout << "[ESTACION 1] No hay vehículos en cola. " << std::endl;
+            std::cout << "[ESTACION 1] No hay vehículos en cola. " << std::endl;
+            std::this_thread::sleep_for(500ms);
             continue;
         }
         else {
@@ -119,12 +123,11 @@ int main()
             std::cout << "[ESTACION 1] Procesando chasis y asignando identificador al automóvil. Tiempo estimado " << period.count() << std::endl;
 
             std::this_thread::sleep_for( period );
-            pcard.car_id = 1;
+            pcard.car_id = ++car_id_counter;
             
             std::cout << "[ESTACION 1] Enviando automóvil " << pcard.car_id << " a la siguiente estación..." << std::endl;
             
         }
-
     }
     
 
