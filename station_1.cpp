@@ -117,7 +117,7 @@ int main()
             int seed = std::chrono::system_clock::now().time_since_epoch().count();
             std::default_random_engine generator (seed);
             std::cout << "[ESTACION 1] Nuevo automovil entrando a producción " << std::endl;
-            double number = exp(generator);
+            double number = norm(generator);
             std::chrono::duration<double> period ( number );
             std::cout << "[ESTACION 1] Procesando chasis y asignando identificador al automóvil. Tiempo estimado " << period.count() << std::endl;
 
