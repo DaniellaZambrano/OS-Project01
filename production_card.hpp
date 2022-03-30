@@ -7,6 +7,10 @@
  * @copyright Copyright (c) 2022
  * 
  */
+
+#ifndef PRODUCTION_CARD
+#define PRODUCTION_CARD
+
 #include <iostream>
 using namespace std;
 
@@ -33,3 +37,5 @@ struct ProductionCard {
     MotorType motor_type;
     CarSeatType seat_type;
 };
+
+#endif
