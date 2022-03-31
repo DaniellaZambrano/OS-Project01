@@ -5,7 +5,8 @@
         "deviation_1": 2.0
     },
     "queues": {
-        "cadena_0": "cadena_0"
+        "cadena_0": "cadena_0",
+        "cadena_1": "cadena_1"
     }
    
 }

@@ -33,23 +33,25 @@ int main()
     i >> config;
 
     // Create queue for CADENA_0
-    key_t key;
-    int msgid;
     std::cout << "[ESTACION 1] Creando cola de arrivo de nuevos vehículos 1\n";
     std::string queue_name = config["queues"]["cadena_0"];
-    int n = queue_name.length();
-    char char_array[n + 1];
-    strcpy(char_array, queue_name.c_str());
-    key = ftok(char_array, 65);
-    msgid = msgget(key, 0666 | IPC_CREAT);
+    int msgid_0 = create_msg_queue(queue_name);
 
     // Create thread to PUT new cars in the queue
     std::cout << "[ESTACION 1] Valor de lambda: " << config["station_1"]["lambda_1"] << std::endl;
     std::exponential_distribution<double> exp = get_exponential_object(
         config["station_1"]["lambda_1"]
         );
-    std::thread t1(new_cars_simulator, exp, msgid);
+    std::thread t1(new_cars_simulator, exp, msgid_0);
     t1.detach();
+
+
+    // Create queue for CADENA_1
+    std::cout << "[ESTACION 1] Creando cola de arrivo de nuevos vehículos 1\n";
+    std::string queue_name_1 = config["queues"]["cadena_1"];
+    int msgid_1 = create_msg_queue(queue_name_1);
+
+
 
     // POP cars from the queue
     std::cout << "[ESTACION 1] Valor de media M1: " << config["station_1"]["mean_1"] << std::endl;
@@ -63,7 +65,7 @@ int main()
     ProductionCard pcard; 
     while (true)
     {
-        size_t data = msgrcv(msgid, &pcard, sizeof(pcard), 0, 0);
+        size_t data = msgrcv(msgid_0, &pcard, sizeof(pcard), 0, 0);
         if (data == 0) {
             std::cout << "[ESTACION 1] No hay vehículos en cola. " << std::endl;
             std::this_thread::sleep_for(500ms);
@@ -81,7 +83,7 @@ int main()
             pcard.car_id = ++car_id_counter;
             
             std::cout << "[ESTACION 1] Enviando automóvil " << pcard.car_id << " a la siguiente estación..." << std::endl;
-            
+            msgsnd(msgid_1,&pcard,sizeof(pcard),0);            
         }
     }
     

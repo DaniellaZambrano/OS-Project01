@@ -2,6 +2,7 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <unordered_map>
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include "production_card.hpp"
@@ -43,12 +44,30 @@ void new_cars_simulator(std::exponential_distribution<double> exp, int queue_id)
     int seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator (seed);
     while (true){
-        std::cout << "[ESTACION 1] Asignando nuevo vehículo para producción.\n";
+        std::cout << "[ESTACION 0] Asignando nuevo vehículo para producción.\n";
         ProductionCard car;
         msgsnd(queue_id, &car, sizeof(car), 0);
         double number = exp(generator);
         std::chrono::duration<double> period ( number );
-        std::cout << "[ESTACION 1] Tiempo estimado para nueva llegada: " << period.count() << std::endl;
+        std::cout << "[ESTACION 0] Tiempo estimado para nueva llegada: " << period.count() << "\n";
         std::this_thread::sleep_for( period );
     } 
+}
+
+
+/**
+ * @brief This function will create a new message queue
+ * 
+ * 
+ * @param queue_name is the string used to generate the key to communicate the queue
+ * @return msg_id : ID of queue
+ */
+int create_msg_queue(std::string queue_name){
+
+    std::hash<std::string> hasher;
+
+    key_t key = (int)hasher(queue_name);
+
+    int msg_id = msgget(key, 0666 | IPC_CREAT);
+    return msg_id;
 }
