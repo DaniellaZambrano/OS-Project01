@@ -43,7 +43,7 @@ void new_cars_simulator(std::exponential_distribution<double> exp, int queue_id)
     int seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator (seed);
     while (true){
-        std::cout << "[ESTACION 1] Asignando nueva vehículo para producción.\n";
+        std::cout << "[ESTACION 1] Asignando nuevo vehículo para producción.\n";
         ProductionCard car;
         msgsnd(queue_id, &car, sizeof(car), 0);
         double number = exp(generator);
