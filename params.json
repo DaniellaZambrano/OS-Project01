@@ -4,6 +4,10 @@
         "mean_1": 5.0,
         "deviation_1": 2.0
     },
+    "station_2": {
+        "mean_2": 3.0,
+        "deviation_2": 1.3
+    },
     "queues": {
         "cadena_0": "cadena_0",
         "cadena_1": "cadena_1",
