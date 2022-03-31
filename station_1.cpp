@@ -47,7 +47,7 @@ int main()
 
 
     // Create queue for CADENA_1
-    std::cout << "[ESTACION 1] Creando cola de arrivo de nuevos vehículos 1\n";
+    std::cout << "[ESTACION 1] Creando cadena de traslado entre estaciones 1 y 2\n";
     std::string queue_name_1 = config["queues"]["cadena_1"];
     int msgid_1 = create_msg_queue(queue_name_1);
 
@@ -65,7 +65,7 @@ int main()
     ProductionCard pcard; 
     while (true)
     {
-        size_t data = msgrcv(msgid_0, &pcard, sizeof(pcard), 0, 0);
+        size_t data = msgrcv(msgid_0, &pcard, sizeof(pcard), 0, IPC_NOWAIT);
         if (data == 0) {
             std::cout << "[ESTACION 1] No hay vehículos en cola. " << std::endl;
             std::this_thread::sleep_for(500ms);
