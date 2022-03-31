@@ -6,7 +6,9 @@
     },
     "queues": {
         "cadena_0": "cadena_0",
-        "cadena_1": "cadena_1"
+        "cadena_1": "cadena_1",
+        "cadena_2": "cadena_2",
+        "cadena_3": "cadena_3"
     }
    
 }
