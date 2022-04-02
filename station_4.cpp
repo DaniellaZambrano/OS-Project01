@@ -38,8 +38,6 @@ int main()
     double mean{config["station_4"]["mean"]}, deviation{config["station_4"]["deviation"]};
     std::normal_distribution<double> norm{get_normal_dist_object(mean, deviation)};
 
-    std::cout << "min: " << norm.min() << ", max: " << norm.max() << std::endl;
-
     std::cout << "[ESTACION 4] Valor de media: " << mean << std::endl;
     std::cout << "[ESTACION 4] Valor de desviacion estandar: " << deviation << std::endl;
 
@@ -52,6 +50,8 @@ int main()
 
     while (true)
     {
+        std::cout << "[ESTACION 4] Aguardando por vehículo en cola." << std::endl;
+
         size_t data = msgrcv(msgid_3, &pcard, sizeof(pcard), 0, 0);
         if (data == 0)
         {

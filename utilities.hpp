@@ -68,8 +68,6 @@ int create_msg_queue(char queue_name){
 
     key_t key{ftok(".keyfile", queue_name)};
 
-    std::cout << "key: " << key << std::endl;
-
     int msg_id;
     if((msg_id = msgget(key, 0666 | IPC_CREAT)) == -1) {
         perror("creating msg queue");
