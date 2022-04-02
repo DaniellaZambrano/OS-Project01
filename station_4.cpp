@@ -33,7 +33,7 @@ int main()
     // Create queue for CADENA_3
     std::cout << "[ESTACION 4] Creando cadena de traslado entre estaciones 3 y 4\n";
     std::string queue_name_3 = config["queues"]["cadena_3"];
-    int msgid_3 = create_msg_queue(queue_name_3);
+    int msgid_3 = create_msg_queue(queue_name_3[0]);
 
     double mean{config["station_4"]["mean"]}, deviation{config["station_4"]["deviation"]};
     std::normal_distribution<double> norm{get_normal_dist_object(mean, deviation)};
@@ -59,19 +59,23 @@ int main()
             std::this_thread::sleep_for(200ms);
             continue;
         }
-        else
+
+        if (data == -1)
         {
-            std::chrono::duration<double> period(norm(generator));
-
-            std::cout << "[ESTACION 4] Automovil " << pcard.car_id << " colocando muebles y demás componentes" << std::endl;
-            std::cout << "[ESTACION 4] Tiempo estimado " << period.count() << std::endl;
-
-            std::this_thread::sleep_for(period);
-
-            // Add car seat type
-            pcard.seat_type = (CarSeatType)(seat_dist(generator));
-            std::cout << "[ESTACION 4] El asiento del automovil " << pcard.car_id << " es: " << CAR_SEAT_TYPE_STR[pcard.seat_type] << std::endl;
+            perror("error receiving message");
+            exit(1);
         }
+
+        std::chrono::duration<double> period(norm(generator));
+
+        std::cout << "[ESTACION 4] Automovil " << pcard.car_id << " colocando muebles y demás componentes" << std::endl;
+        std::cout << "[ESTACION 4] Tiempo estimado " << period.count() << std::endl;
+
+        std::this_thread::sleep_for(period);
+
+        // Add car seat type
+        pcard.seat_type = (CarSeatType)(seat_dist(generator));
+        std::cout << "[ESTACION 4] El asiento del automovil " << pcard.car_id << " es: " << CAR_SEAT_TYPE_STR[pcard.seat_type] << std::endl;
     }
 
     return 0;

@@ -33,13 +33,13 @@ int main(){
     // Create queue for CADENA_2
     std::cout << "[ESTACION 3] Creando cadena de traslado entre estaciones 2 y 3\n";
     std::string queue_name_2 = config["queues"]["cadena_2"];
-    int msgid_2 = create_msg_queue(queue_name_2);
+    int msgid_2 = create_msg_queue(queue_name_2[0]);
 
 
     // Create queue for CADENA_3
     std::cout << "[ESTACION 3] Creando cadena de traslado entre estaciones 3 y 4\n";
     std::string queue_name_3 = config["queues"]["cadena_3"];
-    int msgid_3 = create_msg_queue(queue_name_3);
+    int msgid_3 = create_msg_queue(queue_name_3[0]);
 
 
     std::normal_distribution<double> norm = get_normal_dist_object(config["station_3"]["mean_3"], config["station_3"]["deviation_3"]);
@@ -59,6 +59,10 @@ int main(){
             std::this_thread::sleep_for(200ms);
             continue;
         }
+        else if(data == -1){
+            perror("error receiving message");
+            exit(1);
+        }
         else {
             int seed = std::chrono::system_clock::now().time_since_epoch().count();
             std::default_random_engine generator (seed);
@@ -76,7 +80,12 @@ int main(){
 
             
             std::cout << "[ESTACION 3] Enviando automóvil " << pcard.car_id << " a la siguiente estación..." << std::endl;
-            msgsnd(msgid_3,&pcard,sizeof(pcard),0);            
+
+            if (msgsnd(msgid_3, &pcard, sizeof(pcard), 0) == -1)
+            {
+                perror("sending msg");
+                exit(1);
+            }
         }
     }
 
