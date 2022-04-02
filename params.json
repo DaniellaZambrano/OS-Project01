@@ -9,8 +9,12 @@
         "deviation_2": 1.3
     },
     "station_3": {
-        "mean_3": 7.0,
-        "deviation_3": 1.0
+        "mean_3": 7.1,
+        "deviation_3": 1.2
+    },
+    "station_4": {
+        "mean": 3.6,
+        "deviation": 1.3
     },
     "queues": {
         "cadena_0": "cadena_0",
