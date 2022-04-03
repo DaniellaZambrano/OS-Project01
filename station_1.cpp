@@ -85,9 +85,8 @@ int main()
         std::chrono::duration<double> period(number);
         std::cout << "[ESTACION 1] Procesando chasis y asignando identificador al automóvil. Tiempo estimado " << period.count() << std::endl;
 
-        std::cout << "Sup id: " << supervisor_queue_id << " size: " << sizeof(pcard) << std::endl;
-
         pcard.station = 1;
+        pcard.car_id = ++car_id_counter;
         if (msgsnd(supervisor_queue_id, &pcard, sizeof(pcard), 0) < 0)
         {
             perror("[ESTACION 1] sending card to supervisor");
@@ -95,7 +94,6 @@ int main()
         }
 
         std::this_thread::sleep_for(period);
-        pcard.car_id = ++car_id_counter;
 
         std::cout << "[ESTACION 1] Enviando automóvil " << pcard.car_id << " a la siguiente estación..." << std::endl;
         if (msgsnd(msgid_1, &pcard, sizeof(pcard), 0) < 0)

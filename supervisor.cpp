@@ -27,8 +27,6 @@ int main()
     std::string queue_name = config["queues"]["supervisor"];
     int msgid = create_msg_queue(queue_name[0]);
 
-    std::cout << "[SUPERVISOR] queueu id" << msgid << std::endl;
-
     ProductionCard pcard;
     while (true)
     {
