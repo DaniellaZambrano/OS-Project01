@@ -59,8 +59,8 @@ int main(){
             std::this_thread::sleep_for(200ms);
             continue;
         }
-        else if(data == -1){
-            perror("error receiving message");
+        else if(data < 0){
+            perror("[ESTACION 3] error receiving message");
             exit(1);
         }
         else {
@@ -83,7 +83,7 @@ int main(){
 
             if (msgsnd(msgid_3, &pcard, sizeof(pcard), 0) == -1)
             {
-                perror("sending msg");
+                perror("[ESTACION 3] sending msg");
                 exit(1);
             }
         }

@@ -67,14 +67,13 @@ int main()
     {
         ssize_t data = msgrcv(msgid_0, &pcard, sizeof(pcard), 1, 0);
     
-        std::cout << data << std::endl;
-        if (data <= 0) {
+        if (data == 0) {
             std::cout << "[ESTACION 1] No hay vehículos en cola. " << std::endl;
             std::this_thread::sleep_for(500ms);
             continue;
         }
-        if(data == -1) {
-            perror("error receiving message");
+        if(data < 0) {
+            perror("[ESTACION 1] error receiving message");
             exit(1);
         }
 
@@ -91,7 +90,7 @@ int main()
             
             std::cout << "[ESTACION 1] Enviando automóvil " << pcard.car_id << " a la siguiente estación..." << std::endl;
             if(msgsnd(msgid_1,&pcard,sizeof(pcard),0) == -1) {
-                perror("sending msg");
+                perror("[ESTACION 1] sending card");
                 exit(1);
             }
         }

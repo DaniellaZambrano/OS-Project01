@@ -60,9 +60,9 @@ int main()
             continue;
         }
 
-        if (data == -1)
+        if (data < 0)
         {
-            perror("error receiving message");
+            perror("[ESTACION 4] error receiving message");
             exit(1);
         }
 
