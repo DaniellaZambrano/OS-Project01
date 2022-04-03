@@ -64,8 +64,6 @@ void new_cars_simulator(std::exponential_distribution<double> exp, int queue_id)
  */
 int create_msg_queue(char queue_name){
 
-    std::hash<std::string> hasher;
-
     key_t key{ftok(".keyfile", queue_name)};
 
     int msg_id;
