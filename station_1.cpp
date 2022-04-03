@@ -35,7 +35,7 @@ int main()
     // Create queue for CADENA_0
     std::cout << "[ESTACION 1] Creando cola de arrivo de nuevos vehículos 1\n";
     std::string queue_name = config["queues"]["cadena_0"];
-    int msgid_0 = create_msg_queue(queue_name);
+    int msgid_0 = create_msg_queue(queue_name[0]);
 
     // Create thread to PUT new cars in the queue
     std::cout << "[ESTACION 1] Valor de lambda: " << config["station_1"]["lambda_1"] << std::endl;
@@ -49,7 +49,7 @@ int main()
     // Create queue for CADENA_1
     std::cout << "[ESTACION 1] Creando cadena de traslado entre estaciones 1 y 2\n";
     std::string queue_name_1 = config["queues"]["cadena_1"];
-    int msgid_1 = create_msg_queue(queue_name_1);
+    int msgid_1 = create_msg_queue(queue_name_1[0]);
 
 
 
@@ -65,12 +65,17 @@ int main()
     ProductionCard pcard; 
     while (true)
     {
-        size_t data = msgrcv(msgid_0, &pcard, sizeof(pcard), 0, IPC_NOWAIT);
+        size_t data = msgrcv(msgid_0, &pcard, sizeof(pcard), 0, 0);
         if (data == 0) {
             std::cout << "[ESTACION 1] No hay vehículos en cola. " << std::endl;
             std::this_thread::sleep_for(500ms);
             continue;
         }
+        if(data == -1) {
+            perror("error receiving message");
+            exit(1);
+        }
+
         else {
             int seed = std::chrono::system_clock::now().time_since_epoch().count();
             std::default_random_engine generator (seed);
@@ -83,7 +88,10 @@ int main()
             pcard.car_id = ++car_id_counter;
             
             std::cout << "[ESTACION 1] Enviando automóvil " << pcard.car_id << " a la siguiente estación..." << std::endl;
-            msgsnd(msgid_1,&pcard,sizeof(pcard),0);            
+            if(msgsnd(msgid_1,&pcard,sizeof(pcard),0) == -1) {
+                perror("sending msg");
+                exit(1);
+            }
         }
     }
     

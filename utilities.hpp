@@ -59,15 +59,18 @@ void new_cars_simulator(std::exponential_distribution<double> exp, int queue_id)
  * @brief This function will create a new message queue
  * 
  * 
- * @param queue_name is the string used to generate the key to communicate the queue
+ * @param queue_name is the char used to generate the key to communicate the queue
  * @return msg_id : ID of queue
  */
-int create_msg_queue(std::string queue_name){
+int create_msg_queue(char queue_name){
 
-    std::hash<std::string> hasher;
+    key_t key{ftok(".keyfile", queue_name)};
 
-    key_t key = (int)hasher(queue_name);
+    int msg_id;
+    if((msg_id = msgget(key, 0666 | IPC_CREAT)) == -1) {
+        perror("creating msg queue");
+        exit(1);
+    }
 
-    int msg_id = msgget(key, 0666 | IPC_CREAT);
     return msg_id;
 }
