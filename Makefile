@@ -2,7 +2,7 @@ CC = g++
 VERSION = -std=c++14
 LIBS = -lpthread
 
-all: station_1 station_2 station_3 station_4
+all: station_1 station_2 station_3 station_4 supervisor
 
 station_1: station_1.cpp 
 	$(CC) $(VERSION) -I. station_1.cpp -o station_1.exe $(LIBS)
@@ -15,6 +15,9 @@ station_3: station_3.cpp
 
 station_4: station_4.cpp 
 	$(CC) $(VERSION) -I. station_4.cpp -o station_4.exe
+
+supervisor: supervisor.cpp 
+	$(CC) $(VERSION) -I. supervisor.cpp -o supervisor.exe
 
 tests: test/test_json.cpp test/test_production_card.cpp
 	$(CC) $(VERSION) -I. test/test_json.cpp -o test_json.exe

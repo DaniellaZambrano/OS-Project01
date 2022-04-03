@@ -35,6 +35,10 @@ int main()
     std::string queue_name_3 = config["queues"]["cadena_3"];
     int msgid_3 = create_msg_queue(queue_name_3[0]);
 
+    std::cout << "[ESTACION 4] Creando cadena de información del supervisor\n";
+    std::string supervisor_queue = config["queues"]["supervisor"];
+    int supervisor_queue_id = create_msg_queue(supervisor_queue[0]);
+
     double mean{config["station_4"]["mean"]}, deviation{config["station_4"]["deviation"]};
     std::normal_distribution<double> norm{get_normal_dist_object(mean, deviation)};
 
@@ -70,6 +74,13 @@ int main()
 
         std::cout << "[ESTACION 4] Automovil " << pcard.car_id << " colocando muebles y demás componentes" << std::endl;
         std::cout << "[ESTACION 4] Tiempo estimado " << period.count() << std::endl;
+
+        pcard.station = 4;
+        if (msgsnd(supervisor_queue_id, &pcard, sizeof(pcard), 0) < 0)
+        {
+            perror("[ESTACION 4] sending card to supervisor");
+            exit(1);
+        }
 
         std::this_thread::sleep_for(period);
 
