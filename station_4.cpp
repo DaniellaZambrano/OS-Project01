@@ -45,18 +45,17 @@ int main()
     std::cout << "[ESTACION 4] Valor de media: " << mean << std::endl;
     std::cout << "[ESTACION 4] Valor de desviacion estandar: " << deviation << std::endl;
 
-    ProductionCard pcard;
-
     int seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
 
     std::uniform_int_distribution<int> seat_dist{0, 1};
 
+    QueueMessage msg;
     while (true)
     {
         std::cout << "[ESTACION 4] Aguardando por vehículo en cola." << std::endl;
 
-        ssize_t data = msgrcv(msgid_3, &pcard, sizeof(pcard), 1, 0);
+        ssize_t data = msgrcv(msgid_3, &msg, sizeof(msg.mtext), 1, 0);
         if (data == 0)
         {
             std::cout << "[ESTACION 4] No hay vehículos en cola. " << std::endl;
@@ -70,13 +69,15 @@ int main()
             exit(1);
         }
 
+        ProductionCard &pcard{msg.mtext};
+
         std::chrono::duration<double> period(norm(generator));
 
         std::cout << "[ESTACION 4] Automovil " << pcard.car_id << " colocando muebles y demás componentes" << std::endl;
         std::cout << "[ESTACION 4] Tiempo estimado " << period.count() << std::endl;
 
         pcard.station = 4;
-        if (msgsnd(supervisor_queue_id, &pcard, sizeof(pcard), 0) < 0)
+        if (msgsnd(supervisor_queue_id, &msg, sizeof(msg.mtext), 0) < 0)
         {
             perror("[ESTACION 4] sending card to supervisor");
             exit(1);

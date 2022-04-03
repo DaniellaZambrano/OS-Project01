@@ -27,12 +27,10 @@ int main()
     std::string queue_name = config["queues"]["supervisor"];
     int msgid = create_msg_queue(queue_name[0]);
 
-    ProductionCard pcard;
+    QueueMessage msg;
     while (true)
     {
-        std::cout << "[SUPERVISOR] Aguardando por estación" << std::endl;
-
-        ssize_t data = msgrcv(msgid, &pcard, sizeof(pcard), 1, 0);
+        ssize_t data = msgrcv(msgid, &msg, sizeof(msg.mtext), 1, 0);
 
         if (data < 0)
         {
@@ -40,7 +38,9 @@ int main()
             exit(1);
         }
 
-        std::cout << "[SUPERVISOR] Estación: " << pcard.station << ": procesando vehículo: " << pcard.car_id << std::endl;
+        ProductionCard &pcard{msg.mtext};
+
+        std::cout << "[SUPERVISOR][ESTACION " << pcard.station << "] procesando vehículo: " << pcard.car_id << std::endl;
     }
 
     return 0;

@@ -48,9 +48,9 @@ void new_cars_simulator(std::exponential_distribution<double> exp, int queue_id)
     while (true)
     {
         std::cout << "[ESTACION 0] Asignando nuevo vehículo para producción.\n";
-        ProductionCard car;
+        QueueMessage msg;
 
-        if (msgsnd(queue_id, &car, sizeof(car), 0) < 0)
+        if (msgsnd(queue_id, &msg, sizeof(msg.mtext), 0) < 0)
         {
             perror("[ESTACION 0] error sending car");
             exit(0);

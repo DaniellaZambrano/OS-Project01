@@ -52,11 +52,11 @@ int main()
     std::cout << "[ESTACION 2] Valor de desviacion estandard D2: " << config["station_2"]["deviation_2"] << std::endl;
 
     CarColor color_counter = CarColor::red;
-    ProductionCard pcard;
 
+    QueueMessage msg;
     while (true)
     {
-        ssize_t data = msgrcv(msgid_1, &pcard, sizeof(pcard), 1, 0);
+        ssize_t data = msgrcv(msgid_1, &msg, sizeof(msg.mtext), 1, 0);
         if (data == 0)
         {
             std::cout << "[ESTACION 2] No hay vehículos en cola. " << std::endl;
@@ -68,6 +68,8 @@ int main()
             perror("[ESTACION 2] error receiving message");
             exit(1);
         }
+
+        ProductionCard &pcard{msg.mtext};
 
         int seed = std::chrono::system_clock::now().time_since_epoch().count();
         std::default_random_engine generator(seed);
@@ -83,7 +85,7 @@ int main()
         std::cout << "[ESTACION 2] Color asignado al automovil " << pcard.car_id << ":" << CAR_COLORS_STR[pcard.color] << std::endl;
 
         pcard.station = 2;
-        if (msgsnd(supervisor_queue_id, &pcard, sizeof(pcard), 0) < 0)
+        if (msgsnd(supervisor_queue_id, &msg, sizeof(msg.mtext), 0) < 0)
         {
             perror("[ESTACION 2] sending card to supervisor");
             exit(1);
@@ -96,7 +98,7 @@ int main()
         std::cout << "[ESTACION 2] Carroceria asignada al automovil " << pcard.car_id << ":" << CAR_BODYWORK_STR[pcard.car_bodywork] << std::endl;
 
         std::cout << "[ESTACION 2] Enviando automóvil " << pcard.car_id << " a la siguiente estación..." << std::endl;
-        if (msgsnd(msgid_2, &pcard, sizeof(pcard), 0) < 0)
+        if (msgsnd(msgid_2, &msg, sizeof(msg.mtext), 0) < 0)
         {
             perror("[ESTACION 2] sending msg");
             exit(1);

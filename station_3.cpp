@@ -51,11 +51,10 @@ int main()
     std::cout << "[ESTACION 3] Valor de media M3: " << config["station_3"]["mean_3"] << std::endl;
     std::cout << "[ESTACION 3] Valor de desviacion estandard D3: " << config["station_3"]["deviation_3"] << std::endl;
 
-    ProductionCard pcard;
-
+    QueueMessage msg;
     while (true)
     {
-        ssize_t data = msgrcv(msgid_2, &pcard, sizeof(pcard), 1, 0);
+        ssize_t data = msgrcv(msgid_2, &msg, sizeof(msg.mtext), 1, 0);
         if (data == 0)
         {
             std::cout << "[ESTACION 3] No hay vehículos en cola. " << std::endl;
@@ -69,6 +68,8 @@ int main()
             exit(1);
         }
 
+        ProductionCard &pcard{msg.mtext};
+
         int seed = std::chrono::system_clock::now().time_since_epoch().count();
         std::default_random_engine generator(seed);
         double number = norm(generator);
@@ -78,7 +79,7 @@ int main()
         std::cout << "[ESTACION 3] Tiempo estimado " << period.count() << std::endl;
 
         pcard.station = 3;
-        if (msgsnd(supervisor_queue_id, &pcard, sizeof(pcard), 0) < 0)
+        if (msgsnd(supervisor_queue_id, &msg, sizeof(msg.mtext), 0) < 0)
         {
             perror("[ESTACION 3] sending card to supervisor");
             exit(1);
@@ -92,7 +93,7 @@ int main()
 
         std::cout << "[ESTACION 3] Enviando automóvil " << pcard.car_id << " a la siguiente estación..." << std::endl;
 
-        if (msgsnd(msgid_3, &pcard, sizeof(pcard), 0) < 0)
+        if (msgsnd(msgid_3, &msg, sizeof(msg.mtext), 0) < 0)
         {
             perror("[ESTACION 3] sending msg");
             exit(1);

@@ -61,10 +61,10 @@ int main()
 
     int car_id_counter{0};
 
-    ProductionCard pcard;
+    QueueMessage msg;
     while (true)
     {
-        ssize_t data = msgrcv(msgid_0, &pcard, sizeof(pcard), 1, 0);
+        ssize_t data = msgrcv(msgid_0, &msg, sizeof(msg.mtext), 1, 0);
 
         if (data == 0)
         {
@@ -78,6 +78,8 @@ int main()
             exit(1);
         }
 
+        ProductionCard &pcard{msg.mtext};
+
         int seed = std::chrono::system_clock::now().time_since_epoch().count();
         std::default_random_engine generator(seed);
         std::cout << "[ESTACION 1] Nuevo automovil entrando a producción " << std::endl;
@@ -87,7 +89,8 @@ int main()
 
         pcard.station = 1;
         pcard.car_id = ++car_id_counter;
-        if (msgsnd(supervisor_queue_id, &pcard, sizeof(pcard), 0) < 0)
+
+        if (msgsnd(supervisor_queue_id, &msg, sizeof(msg.mtext), 0) < 0)
         {
             perror("[ESTACION 1] sending card to supervisor");
             exit(1);
@@ -96,7 +99,7 @@ int main()
         std::this_thread::sleep_for(period);
 
         std::cout << "[ESTACION 1] Enviando automóvil " << pcard.car_id << " a la siguiente estación..." << std::endl;
-        if (msgsnd(msgid_1, &pcard, sizeof(pcard), 0) < 0)
+        if (msgsnd(msgid_1, &msg, sizeof(msg.mtext), 0) < 0)
         {
             perror("[ESTACION 1] sending card");
             exit(1);
