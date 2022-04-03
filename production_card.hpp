@@ -31,6 +31,7 @@ enum CarSeatType { leather, fabric };
 string CAR_SEAT_TYPE_STR[2] = { "Leather", "Fabric" };
   
 struct ProductionCard {
+    long mtype = 1;
     int car_id;
     CarColor color;
     CarBodywork car_bodywork;

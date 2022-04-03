@@ -52,7 +52,7 @@ int main()
     {
         std::cout << "[ESTACION 4] Aguardando por vehículo en cola." << std::endl;
 
-        size_t data = msgrcv(msgid_3, &pcard, sizeof(pcard), 0, 0);
+        ssize_t data = msgrcv(msgid_3, &pcard, sizeof(pcard), 1, 0);
         if (data == 0)
         {
             std::cout << "[ESTACION 4] No hay vehículos en cola. " << std::endl;

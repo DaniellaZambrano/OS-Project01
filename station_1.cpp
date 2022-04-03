@@ -65,8 +65,10 @@ int main()
     ProductionCard pcard; 
     while (true)
     {
-        size_t data = msgrcv(msgid_0, &pcard, sizeof(pcard), 0, 0);
-        if (data == 0) {
+        ssize_t data = msgrcv(msgid_0, &pcard, sizeof(pcard), 1, 0);
+    
+        std::cout << data << std::endl;
+        if (data <= 0) {
             std::cout << "[ESTACION 1] No hay vehículos en cola. " << std::endl;
             std::this_thread::sleep_for(500ms);
             continue;
