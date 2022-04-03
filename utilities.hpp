@@ -46,7 +46,12 @@ void new_cars_simulator(std::exponential_distribution<double> exp, int queue_id)
     while (true){
         std::cout << "[ESTACION 0] Asignando nuevo vehículo para producción.\n";
         ProductionCard car;
-        msgsnd(queue_id, &car, sizeof(car), 0);
+    
+        if(msgsnd(queue_id, &car, sizeof(car), 0) == -1) {
+            perror("[ESTACION 0] error sending car");
+            exit(0);
+        }
+       
         double number = exp(generator);
         std::chrono::duration<double> period ( number );
         std::cout << "[ESTACION 0] Tiempo estimado para nueva llegada: " << period.count() << "\n";
