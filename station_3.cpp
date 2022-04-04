@@ -69,7 +69,6 @@ int main() {
             perror("[ESTACION 3] sending card to supervisor");
             exit(1);
         }
-        std::cout << "[ESTACION 3] Envíado" << pcard.car_id << " al supervisor..." << std::endl;
 
         std::this_thread::sleep_for(period);
 
