@@ -70,6 +70,13 @@ int main() {
         // Add car seat type
         pcard.seat_type = (CarSeatType)(seat_dist(generator));
         std::cout << "[ESTACION 4] Asientos asignado al automóvil: " << CAR_SEAT_TYPE_STR[pcard.seat_type] << std::endl;
+
+        pcard.finalizado = true;
+        std::cout << "[ESTACION 4] automóvil finalizado, notificando al supervisor..." << std::endl;
+        if (msgsnd(supervisor_queue_id, &msg, sizeof(msg.mtext), 0) < 0) {
+            perror("[ESTACION 4] sending finished card to supervisor");
+            exit(1);
+        }
     }
 
     return 0;

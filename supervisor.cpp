@@ -31,7 +31,17 @@ int main() {
 
         ProductionCard& pcard{ msg.mtext };
 
-        std::cout << "[SUPERVISOR][ESTACION " << pcard.station << "] procesando vehículo: " << pcard.car_id << std::endl;
+        if (!pcard.finalizado) {
+            std::cout << "[SUPERVISOR][ESTACION " << pcard.station << "] procesando automóvil: " << pcard.car_id << std::endl;
+        }
+        else {
+            std::cout << "[SUPERVISOR][ESTACION " << pcard.station << "] finalizó automóvil: " << pcard.car_id << std::endl;
+            std::cout << "\tid: " << pcard.car_id << std::endl;
+            std::cout << "\tcolor: " << CAR_COLORS_STR[pcard.color] << std::endl;
+            std::cout << "\tbody work: " << CAR_BODYWORK_STR[pcard.car_bodywork] << std::endl;
+            std::cout << "\tmotor: " << MOTOR_TYPE_STR[pcard.motor_type] << std::endl;
+            std::cout << "\tasientos: " << CAR_SEAT_TYPE_STR[pcard.seat_type] << std::endl;
+        }
     }
 
     return 0;

@@ -21,7 +21,7 @@ enum CarColor
     blue
 };
 
-string CAR_COLORS_STR[3] = {"Red", "Green", "Blue"};
+string CAR_COLORS_STR[3] = { "Red", "Green", "Blue" };
 
 enum CarBodywork
 {
@@ -29,7 +29,7 @@ enum CarBodywork
     coupe
 };
 
-string CAR_BODYWORK_STR[2] = {"Sedan", "Coupe"};
+string CAR_BODYWORK_STR[2] = { "Sedan", "Coupe" };
 
 enum MotorType
 {
@@ -38,7 +38,7 @@ enum MotorType
     gas
 };
 
-string MOTOR_TYPE_STR[3] = {"Gasoline", "Diesel", "Gas"};
+string MOTOR_TYPE_STR[3] = { "Gasoline", "Diesel", "Gas" };
 
 enum CarSeatType
 {
@@ -46,16 +46,18 @@ enum CarSeatType
     fabric
 };
 
-string CAR_SEAT_TYPE_STR[2] = {"Leather", "Fabric"};
+string CAR_SEAT_TYPE_STR[2] = { "Leather", "Fabric" };
 
 struct ProductionCard
 {
-    int station;
     int car_id;
     CarColor color;
     CarBodywork car_bodywork;
     MotorType motor_type;
     CarSeatType seat_type;
+
+    int station;
+    bool finalizado;
 };
 
 struct QueueMessage
