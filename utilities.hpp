@@ -7,6 +7,7 @@
 #include <sys/msg.h>
 #include "production_card.hpp"
 
+using json = nlohmann::json;
 using namespace std::chrono_literals;
 
 /**
@@ -15,8 +16,7 @@ using namespace std::chrono_literals;
  * @param lambda
  * @return double
  */
-std::exponential_distribution<double> get_exponential_object(double lambda)
-{
+std::exponential_distribution<double> get_exponential_object(double lambda) {
     std::exponential_distribution<double> distribution(lambda);
     return distribution;
 }
@@ -29,8 +29,7 @@ std::exponential_distribution<double> get_exponential_object(double lambda)
  * @param d1
  * @return std::normal_distribution<double>
  */
-std::normal_distribution<double> get_normal_dist_object(double m1, double d1)
-{
+std::normal_distribution<double> get_normal_dist_object(double m1, double d1) {
     std::normal_distribution<double> distribution(m1, d1);
     return distribution;
 }
@@ -41,17 +40,14 @@ std::normal_distribution<double> get_normal_dist_object(double m1, double d1)
  *
  * @param exp
  */
-void new_cars_simulator(std::exponential_distribution<double> exp, int queue_id)
-{
+void new_cars_simulator(std::exponential_distribution<double> exp, int queue_id) {
     int seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
-    while (true)
-    {
+    while (true) {
         std::cout << "[ESTACION 0] Asignando nuevo vehículo para producción.\n";
         QueueMessage msg;
 
-        if (msgsnd(queue_id, &msg, sizeof(msg.mtext), 0) < 0)
-        {
+        if (msgsnd(queue_id, &msg, sizeof(msg.mtext), 0) < 0) {
             perror("[ESTACION 0] error sending car");
             exit(0);
         }
@@ -70,17 +66,22 @@ void new_cars_simulator(std::exponential_distribution<double> exp, int queue_id)
  * @param queue_name is the char used to generate the key to communicate the queue
  * @return msg_id : ID of queue
  */
-int create_msg_queue(char queue_name)
-{
-
-    key_t key{ftok(".keyfile", queue_name)};
+int create_msg_queue(std::string queue_name) {
+    key_t key{ ftok(".keyfile", queue_name[0]) };
 
     int msg_id;
-    if ((msg_id = msgget(key, 0666 | IPC_CREAT)) < 0)
-    {
+    if ((msg_id = msgget(key, 0666 | IPC_CREAT)) < 0) {
         perror("creating msg queue");
         exit(1);
     }
 
     return msg_id;
+}
+
+json get_config() {
+    std::ifstream i("params.json");
+    json config;
+    i >> config;
+
+    return std::move(config);
 }
