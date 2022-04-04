@@ -38,9 +38,9 @@ int main() {
     int supervisor_queue_id = create_msg_queue(config["queues"]["supervisor"]);
 
     // Create thread to PUT new cars in the queue
-    std::cout << "[ESTACION 1] Valor de lambda: " << config["station_1"]["lambda"] << std::endl;
-    std::exponential_distribution<double> exp = get_exponential_object(
-        config["station_1"]["lambda"]);
+    std::exponential_distribution<double> exp = get_exponential_object(config["station_1"]["lambda"]);
+    std::cout << "[ESTACION 1] Valor de lambda: " << exp.lambda() << std::endl;
+
     std::thread t1(new_cars_simulator, exp, msgid_0);
     t1.detach();
 
@@ -50,7 +50,7 @@ int main() {
         config["station_1"]["mean"], config["station_1"]["deviation"]);
 
     std::cout << "[ESTACION 1] Valor de media: " << norm.mean() << std::endl;
-    std::cout << "[ESTACION 1] Valor de desviacion estandard: " << norm.stddev() << std::endl;
+    std::cout << "[ESTACION 1] Valor de desviación estandar: " << norm.stddev() << std::endl;
 
     int car_id_counter{ 0 };
 

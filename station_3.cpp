@@ -40,7 +40,7 @@ int main() {
 
     // POP cars from the queue
     std::cout << "[ESTACION 3] Valor de media: " << norm.mean() << std::endl;
-    std::cout << "[ESTACION 3] Valor de desviacion estandard: " << norm.stddev() << std::endl;
+    std::cout << "[ESTACION 3] Valor de desviación estandar: " << norm.stddev() << std::endl;
 
     int seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);

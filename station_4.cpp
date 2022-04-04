@@ -43,8 +43,6 @@ int main() {
 
     QueueMessage msg;
     while (true) {
-        std::cout << "[ESTACION 4] Aguardando por vehículo en cola." << std::endl;
-
         ssize_t data = msgrcv(msgid_3, &msg, sizeof(msg.mtext), 1, 0);
 
         if (data < 0) {
