@@ -40,21 +40,22 @@ std::normal_distribution<double> get_normal_dist_object(double m1, double d1) {
  *
  * @param exp
  */
-void new_cars_simulator(std::exponential_distribution<double> exp, int queue_id) {
+void new_cars_simulator(std::exponential_distribution<double> exp_dist, int queue_id) {
     int seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
+
     while (true) {
-        std::cout << "[ESTACION 0] Asignando nuevo vehículo para producción.\n";
         QueueMessage msg;
+        std::cout << "[ESTACION 0] Asignando nuevo vehículo para producción" << std::endl;
 
         if (msgsnd(queue_id, &msg, sizeof(msg.mtext), 0) < 0) {
             perror("[ESTACION 0] error sending car");
             exit(0);
         }
 
-        double number = exp(generator);
-        std::chrono::duration<double> period(number);
-        std::cout << "[ESTACION 0] Tiempo estimado para nueva llegada: " << period.count() << "\n";
+        std::chrono::duration<double> period(exp_dist(generator));
+        std::cout << "[ESTACION 0] Tiempo estimado para nueva llegada: " << period.count() << std::endl;
+
         std::this_thread::sleep_for(period);
     }
 }

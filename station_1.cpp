@@ -22,19 +22,19 @@
 
 int main() {
     // Read parameters file
-    std::cout << "[ESTACION 1] Creando estación 1\n";
+    std::cout << "[ESTACION 1] Creando estación" << std::endl;
     json config{ get_config() };
 
     // Create queue for CADENA_0
-    std::cout << "[ESTACION 1] Creando cola de arrivo de nuevos vehículos 1\n";
+    std::cout << "[ESTACION 1] Creando cola de arrivo de nuevos vehículos 1" << std::endl;
     int msgid_0 = create_msg_queue(config["queues"]["cadena_0"]);
 
     // Create queue for CADENA_1
-    std::cout << "[ESTACION 1] Creando cadena de traslado entre estaciones 1 y 2\n";
+    std::cout << "[ESTACION 1] Creando cadena de traslado entre estaciones 1 y 2" << std::endl;
     int msgid_1 = create_msg_queue(config["queues"]["cadena_1"]);
 
     // Create queue for SUPERVISOR
-    std::cout << "[ESTACION 1] Creando cadena de información del supervisor\n";
+    std::cout << "[ESTACION 1] Creando cadena de información del supervisor" << std::endl;
     int supervisor_queue_id = create_msg_queue(config["queues"]["supervisor"]);
 
     // Create thread to PUT new cars in the queue
@@ -45,6 +45,8 @@ int main() {
     t1.detach();
 
     // POP cars from the queue
+    int seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::default_random_engine generator(seed);
 
     std::normal_distribution<double> norm = get_normal_dist_object(
         config["station_1"]["mean"], config["station_1"]["deviation"]);
@@ -54,9 +56,6 @@ int main() {
 
     int car_id_counter{ 0 };
 
-    int seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine generator(seed);
-
     QueueMessage msg;
     while (true) {
         ssize_t data = msgrcv(msgid_0, &msg, sizeof(msg.mtext), 1, 0);
@@ -65,16 +64,19 @@ int main() {
             perror("[ESTACION 1] error receiving message");
             exit(1);
         }
+        std::cout << "[ESTACION 1] ----- Nuevo automóvil entrando a producción -----" << std::endl;
 
         ProductionCard& pcard{ msg.mtext };
 
-        std::cout << "[ESTACION 1] Nuevo automovil entrando a producción " << std::endl;
-
         std::chrono::duration<double> period(norm(generator));
-        std::cout << "[ESTACION 1] Procesando chasis y asignando identificador al automóvil. Tiempo estimado " << period.count() << std::endl;
+        std::cout << "[ESTACION 1] automóvil entrando a asignando identificador y colocado de chasis..." << std::endl;
+        std::cout << "[ESTACION 2] Tiempo estimado: " << period.count() << std::endl;
 
+        // Add id
         pcard.car_id = ++car_id_counter;
+        std::cout << "[ESTACION 1] ID asignado al automóvil: " << pcard.car_id << std::endl;
 
+        std::cout << "[ESTACION 1] Notificando al supervisor..." << std::endl;
         pcard.station = 1;
         if (msgsnd(supervisor_queue_id, &msg, sizeof(msg.mtext), 0) < 0) {
             perror("[ESTACION 1] sending card to supervisor");
@@ -83,7 +85,7 @@ int main() {
 
         std::this_thread::sleep_for(period);
 
-        std::cout << "[ESTACION 1] Enviando automóvil " << pcard.car_id << " a la siguiente estación..." << std::endl;
+        std::cout << "[ESTACION 1] Enviando automóvil a la siguiente estación..." << std::endl;
         if (msgsnd(msgid_1, &msg, sizeof(msg.mtext), 0) < 0) {
             perror("[ESTACION 1] sending card");
             exit(1);

@@ -13,11 +13,11 @@
 
 int main() {
     // Read parameters file
-    std::cout << "[SUPERVISOR] Creando supervisor\n";
+    std::cout << "[SUPERVISOR] Creando supervisor" << std::endl;
     json config{ get_config() };
 
     // Create queue for SUPERVISOR
-    std::cout << "[SUPERVISOR] Creando cola de arrivo de vehículos de las estaciones\n";
+    std::cout << "[SUPERVISOR] Creando cola de arrivo de vehículos de las estaciones" << std::endl;
     int queue_id = create_msg_queue(config["queues"]["supervisor"]);
 
     QueueMessage msg;
