@@ -5,6 +5,7 @@ Este repositorio contiene el proyecto 1 de programación para la materia Sistema
 - Explicación de la implementación
 - Instrucciones para compilar el código
 - Instrucciones para ejecutar el código
+- Modificar los parámetros de simulación
 - Demo
 
 -----
@@ -38,7 +39,7 @@ al sistema:
 
 ### Instrucciones para ejecutar el código
 
-1. Ejecute los programas obtenidos, en diferentes terminales y en el siguiente orden:
+1. Ejecute los programas obtenidos, en diferentes terminales:
     - `station_1.exe`
     - `station_2.exe`
     - `station_3.exe`
@@ -50,5 +51,18 @@ fabricación de los automóviles en la fábrica:
 
 ![imagen_1](imgs/img1.png)
 
+-----
+
+### Modificar los parámetros de simulación
+
+Los parámetros de simulación de la fábrica pueden ser modificados en el archivo de configuración `params.json`. 
+Ahí es posible modificar: 
+
+- El valor `lambda_1` para la distribución exponencial que simula el tiempo entre llegadas. 
+- Los valores de media (`mean_x`) ) para las distribuciones normales que simulan el tiempo en cada estación. 
+- Los valores de desviación estándar (`deviation_x`) para las distribuciones que simulan el tiempo en cada estación. 
+
+
+-----
 
 ### Demo
