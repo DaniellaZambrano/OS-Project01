@@ -27,7 +27,7 @@ int msgid_3, supervisor_queue_id;
 
 static void stop(int unused){
         // Signal managment to stop the process 
-    signal(SIGINT,(__sighandler_t)stop);
+    kill(getpid(), SIGINT);
 
 	std::cout << RED <<"[ESTACION 4] Deteniendo proceso de la estacion 4.............\n";
 
