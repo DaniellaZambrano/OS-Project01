@@ -16,9 +16,8 @@
 
 static void stop(int unused){
         // Signal managment to stop the process 
-    kill(getpid(), SIGINT);
 
-	std::cout << RED <<"[SUPERVISOR] Fabrica detenida.............\n";
+	std::cout << RED <<"[SUPERVISOR] Fabrica detenida.............\n" << NORMAL;
 
     raise(SIGKILL);
 }

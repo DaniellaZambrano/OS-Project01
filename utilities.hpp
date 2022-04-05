@@ -92,7 +92,7 @@ json get_config() {
     return std::move(config);
 }
 
-#define KNRM  "\x1B[0m"
+#define NORMAL  "\x1B[0m"
 #define RED  "\x1B[31m"
 #define GREEN  "\x1B[32m"
 #define YELLOW  "\x1B[33m"
