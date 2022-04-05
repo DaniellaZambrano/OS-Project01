@@ -44,7 +44,7 @@ int main() {
 
         if (data < 0) {
             perror("[SUPERVISOR] error receiving message");
-            sigqueue(getpid(), SIGINT,(union sigval){.sival_ptr = NULL });
+            kill(getpid(), SIGINT);
             exit(1);
         }
 

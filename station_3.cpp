@@ -73,7 +73,7 @@ int main() {
 
         if (data < 0) {
             perror("[ESTACION 3] error receiving message");
-            sigqueue(getpid(), SIGINT,(union sigval){.sival_ptr = NULL });
+            kill(getpid(), SIGINT);
             exit(1);
         }
         ProductionCard& pcard{ msg.mtext };
@@ -86,7 +86,7 @@ int main() {
         pcard.station = 3;
         if (msgsnd(supervisor_queue_id, &msg, sizeof(msg.mtext), 0) < 0) {
             perror("[ESTACION 3] sending card to supervisor");
-            sigqueue(getpid(), SIGINT,(union sigval){.sival_ptr = NULL });
+            kill(getpid(), SIGINT);
             exit(1);
         }
 
@@ -102,7 +102,7 @@ int main() {
         std::cout << "[ESTACION 3] Enviando automóvil a la siguiente estación..." << std::endl;
         if (msgsnd(msgid_3, &msg, sizeof(msg.mtext), 0) < 0) {
             perror("[ESTACION 3] sending msg");
-            sigqueue(getpid(), SIGINT,(union sigval){.sival_ptr = NULL });
+            kill(getpid(), SIGINT);
             exit(1);
         }
     }
