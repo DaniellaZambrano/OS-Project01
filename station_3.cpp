@@ -37,7 +37,7 @@ static void stop(int unused){
 
 int main() {
         // Signal managment to stop the process 
-    signal(SIGINT,(__sighandler_t)stop);
+    signal(SIGINT,stop);
 
     // Read parameters file
     std::cout << CYAN << "[ESTACION 3] Creando estación" << std::endl;
