@@ -27,7 +27,7 @@
 int msgid_0, msgid_1;
 
 static void stop(int unused){
-	std::cout << RED <<"[ESTACION 1] Deteniendo proceso de la estacion 1.............\n" << WHITE << NORMAL;
+	std::cout << RED <<"[ESTACION 1] Deteniendo proceso de la estacion 1............." << NORMAL << "\n";
 
     delete_queue(msgid_0);
     delete_queue(msgid_1);
