@@ -79,6 +79,11 @@ int create_msg_queue(std::string queue_name) {
     return msg_id;
 }
 
+void delete_queue(int queue_id){
+    msgctl(queue_id,IPC_RMID,NULL);
+}
+
+
 json get_config() {
     std::ifstream i("params.json");
     json config;
@@ -86,3 +91,11 @@ json get_config() {
 
     return std::move(config);
 }
+
+#define KNRM  "\x1B[0m"
+#define RED  "\x1B[31m"
+#define GREEN  "\x1B[32m"
+#define YELLOW  "\x1B[33m"
+#define BLUE  "\x1B[34m"
+#define MAGENTA  "\x1B[35m"
+#define CYAN  "\x1B[36m"

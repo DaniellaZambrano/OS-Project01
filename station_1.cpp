@@ -16,22 +16,44 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <cstring>
+#include <signal.h>
+#include <unistd.h>
+
 #include "json.hpp"
 #include "production_card.hpp"
 #include "utilities.hpp"
 
+
+int msgid_0, msgid_1;
+
+static void stop(int unused){
+	std::cout << RED <<"[ESTACION 1] Deteniendo proceso de la estacion 1.............\n";
+
+    delete_queue(msgid_0);
+    delete_queue(msgid_1);
+
+    raise(SIGKILL);
+}
+
 int main() {
+
+    // Signal managment to stop the process 
+    signal(SIGINT,(__sighandler_t)stop);
+
+
     // Read parameters file
-    std::cout << "[ESTACION 1] Creando estación" << std::endl;
-    json config{ get_config() };
+    std::cout << GREEN << "[ESTACION 1] Creando estación" << std::endl;
+    std::ifstream i("params.json");
+    json config;
+    i >> config;
 
     // Create queue for CADENA_0
     std::cout << "[ESTACION 1] Creando cola de arrivo de nuevos vehículos 1" << std::endl;
-    int msgid_0 = create_msg_queue(config["queues"]["cadena_0"]);
+    msgid_0 = create_msg_queue(config["queues"]["cadena_0"]);
 
     // Create queue for CADENA_1
     std::cout << "[ESTACION 1] Creando cadena de traslado entre estaciones 1 y 2" << std::endl;
-    int msgid_1 = create_msg_queue(config["queues"]["cadena_1"]);
+    msgid_1 = create_msg_queue(config["queues"]["cadena_1"]);
 
     // Create queue for SUPERVISOR
     std::cout << "[ESTACION 1] Creando cadena de información del supervisor" << std::endl;
@@ -42,7 +64,9 @@ int main() {
     std::cout << "[ESTACION 1] Valor de lambda: " << exp.lambda() << std::endl;
 
     std::thread t1(new_cars_simulator, exp, msgid_0);
+
     t1.detach();
+
 
     // POP cars from the queue
     int seed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -62,6 +86,7 @@ int main() {
 
         if (data < 0) {
             perror("[ESTACION 1] error receiving message");
+            sigqueue(getpid(), SIGINT,(union sigval){.sival_ptr = NULL });
             exit(1);
         }
         std::cout << "[ESTACION 1] ----- Nuevo automóvil entrando a producción -----" << std::endl;
@@ -80,6 +105,7 @@ int main() {
         pcard.station = 1;
         if (msgsnd(supervisor_queue_id, &msg, sizeof(msg.mtext), 0) < 0) {
             perror("[ESTACION 1] sending card to supervisor");
+            sigqueue(getpid(), SIGINT,(union sigval){.sival_ptr = NULL });
             exit(1);
         }
 
@@ -88,9 +114,11 @@ int main() {
         std::cout << "[ESTACION 1] Enviando automóvil a la siguiente estación..." << std::endl;
         if (msgsnd(msgid_1, &msg, sizeof(msg.mtext), 0) < 0) {
             perror("[ESTACION 1] sending card");
+            sigqueue(getpid(), SIGINT,(union sigval){.sival_ptr = NULL });
             exit(1);
         }
     }
 
     return 0;
 }
+

@@ -7,14 +7,32 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <cstring>
+#include <signal.h>
+#include <unistd.h>
+
 #include "json.hpp"
 #include "production_card.hpp"
 #include "utilities.hpp"
 
+static void stop(int unused){
+        // Signal managment to stop the process 
+    signal(SIGINT,(__sighandler_t)stop);
+
+	std::cout << RED <<"[SUPERVISOR] Fabrica detenida.............\n";
+
+    raise(SIGKILL);
+}
+
+
 int main() {
+    // Signal managment to stop the process 
+    signal(SIGINT,(__sighandler_t)stop);
+
     // Read parameters file
     std::cout << "[SUPERVISOR] Creando supervisor" << std::endl;
-    json config{ get_config() };
+    std::ifstream i("params.json");
+    json config;
+    i >> config;
 
     // Create queue for SUPERVISOR
     std::cout << "[SUPERVISOR] Creando cola de arrivo de vehículos de las estaciones" << std::endl;
@@ -26,6 +44,7 @@ int main() {
 
         if (data < 0) {
             perror("[SUPERVISOR] error receiving message");
+            sigqueue(getpid(), SIGINT,(union sigval){.sival_ptr = NULL });
             exit(1);
         }
 
