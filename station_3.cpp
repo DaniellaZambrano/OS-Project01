@@ -1,11 +1,11 @@
 /**
  * @file station_3.cpp
- * @brief This code is the Station 3 of the problem. 
+ * @brief This code is the Station 3 of the problem.
  * @version 0.1
  * @date 2022-03-31
- * 
+ *
  * @copyright Copyright (c) 2022
- * 
+ *
  */
 
 #include <iostream>
@@ -16,76 +16,94 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <cstring>
+#include <signal.h>
+#include <unistd.h>
+
 #include "json.hpp"
 #include "production_card.hpp"
 #include "utilities.hpp"
 
-using json = nlohmann::json;
-using namespace std::chrono_literals;
+int msgid_2, msgid_3;
 
-int main(){
+static void stop(int unused){
+	std::cout << RED <<"[ESTACION 3] Deteniendo proceso de la estacion 3.............\n"  << WHITE << NORMAL;
+
+    delete_queue(msgid_2);
+    delete_queue(msgid_3);
+
+    raise(SIGKILL);
+}
+
+
+int main() {
+        // Signal managment to stop the process 
+    signal(SIGINT,stop);
+
     // Read parameters file
-    std::cout << "[ESTACION 3] Creando estación 3\n";
+    std::cout << CYAN << "[ESTACION 3] Creando estación" << std::endl;
     std::ifstream i("params.json");
     json config;
     i >> config;
 
     // Create queue for CADENA_2
-    std::cout << "[ESTACION 3] Creando cadena de traslado entre estaciones 2 y 3\n";
-    std::string queue_name_2 = config["queues"]["cadena_2"];
-    int msgid_2 = create_msg_queue(queue_name_2[0]);
-
+    std::cout << "[ESTACION 3] Creando cadena de traslado entre estaciones 2 y 3" << std::endl;
+    msgid_2 = create_msg_queue(config["queues"]["cadena_2"]);
 
     // Create queue for CADENA_3
-    std::cout << "[ESTACION 3] Creando cadena de traslado entre estaciones 3 y 4\n";
-    std::string queue_name_3 = config["queues"]["cadena_3"];
-    int msgid_3 = create_msg_queue(queue_name_3[0]);
+    std::cout << "[ESTACION 3] Creando cadena de traslado entre estaciones 3 y 4" << std::endl;
+    msgid_3 = create_msg_queue(config["queues"]["cadena_3"]);
 
-
-    std::normal_distribution<double> norm = get_normal_dist_object(config["station_3"]["mean_3"], config["station_3"]["deviation_3"]);
-
+    // Create queue for SUPERVISOR
+    std::cout << "[ESTACION 3] Creando cadena de información del supervisor" << std::endl;
+    int supervisor_queue_id = create_msg_queue(config["queues"]["supervisor"]);
 
     // POP cars from the queue
-    std::cout << "[ESTACION 3] Valor de media M3: " << config["station_3"]["mean_3"] << std::endl;
-    std::cout << "[ESTACION 3] Valor de desviacion estandard D3: " << config["station_3"]["deviation_3"] << std::endl;
+    int seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::default_random_engine generator(seed);
 
-    ProductionCard pcard; 
+    std::normal_distribution<double> norm = get_normal_dist_object(config["station_3"]["mean"], config["station_3"]["deviation"]);
+    std::cout << "[ESTACION 3] Valor de media: " << norm.mean() << std::endl;
+    std::cout << "[ESTACION 3] Valor de desviación estandar: " << norm.stddev() << std::endl;
 
-    while (true)
-    {
-        ssize_t data = msgrcv(msgid_2, &pcard, sizeof(pcard), 1, 0);
-        if (data == 0) {
-            std::cout << "[ESTACION 3] No hay vehículos en cola. " << std::endl;
-            std::this_thread::sleep_for(200ms);
-            continue;
-        }
-        else if(data < 0){
+    std::uniform_int_distribution<int> motor_dist{ 0, 2 };
+
+    QueueMessage msg;
+    while (true) {
+        ssize_t data = msgrcv(msgid_2, &msg, sizeof(msg.mtext), 1, 0);
+
+        if (data < 0) {
             perror("[ESTACION 3] error receiving message");
+            kill(getpid(), SIGINT);
             exit(1);
         }
-        else {
-            int seed = std::chrono::system_clock::now().time_since_epoch().count();
-            std::default_random_engine generator (seed);
-            double number = norm(generator);
-            std::chrono::duration<double> period ( number );
+        ProductionCard& pcard{ msg.mtext };
 
-            std::cout << "[ESTACION 3] Automovil "<< pcard.car_id <<" colocando motor y cableado ..." << std::endl;
-            std::cout << "[ESTACION 3] Tiempo estimado " << period.count() << std::endl;
+        std::cout << "[ESTACION 3] ----- Nuevo automóvil: " << pcard.car_id << " -----" << std::endl;
 
-            std::this_thread::sleep_for( period );
+        std::chrono::duration<double> period(norm(generator));
 
-            // Add car bodywork
-            pcard.motor_type = (MotorType)(seed%3);
-            std::cout << "[ESTACION 3] El motor del automovil "<< pcard.car_bodywork <<" es: " << MOTOR_TYPE_STR[pcard.motor_type] << std::endl;
+        std::cout << "[ESTACION 3] Notificando al supervisor." << std::endl;
+        pcard.station = 3;
+        if (msgsnd(supervisor_queue_id, &msg, sizeof(msg.mtext), 0) < 0) {
+            perror("[ESTACION 3] sending card to supervisor");
+            kill(getpid(), SIGINT);
+            exit(1);
+        }
 
-            
-            std::cout << "[ESTACION 3] Enviando automóvil " << pcard.car_id << " a la siguiente estación..." << std::endl;
+        std::cout << "[ESTACION 3] automóvil entrando a colocado de motor y cableado" << std::endl;
+        std::cout << "[ESTACION 3] Tiempo estimado: " << period.count() << std::endl;
 
-            if (msgsnd(msgid_3, &pcard, sizeof(pcard), 0) == -1)
-            {
-                perror("[ESTACION 3] sending msg");
-                exit(1);
-            }
+        std::this_thread::sleep_for(period);
+
+        // Add car bodywork
+        pcard.motor_type = (MotorType)(motor_dist(generator));
+        std::cout << "[ESTACION 3] motor asignado al automóvil: " << MOTOR_TYPE_STR[pcard.motor_type] << std::endl;
+
+        std::cout << "[ESTACION 3] Enviando automóvil a la siguiente estación..." << std::endl;
+        if (msgsnd(msgid_3, &msg, sizeof(msg.mtext), 0) < 0) {
+            perror("[ESTACION 3] sending msg");
+            kill(getpid(), SIGINT);
+            exit(1);
         }
     }
 

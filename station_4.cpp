@@ -16,66 +16,92 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <cstring>
+#include <signal.h>
+#include <unistd.h>
+
 #include "json.hpp"
 #include "production_card.hpp"
 #include "utilities.hpp"
 
-using json = nlohmann::json;
-using namespace std::chrono_literals;
+int msgid_3, supervisor_queue_id;
 
-int main()
-{
-    std::cout << "[ESTACION 4] Creando estación\n";
+static void stop(int unused){
+        // Signal managment to stop the process 
+	std::cout << RED <<"[ESTACION 4] Deteniendo proceso de la estacion 4.............\n" << WHITE << NORMAL;
+
+    delete_queue(msgid_3);
+    delete_queue(supervisor_queue_id);
+
+    raise(SIGKILL);
+}
+
+
+int main() {
+    // Signal managment to stop the process 
+    signal(SIGINT,stop);
+
+
+    std::cout << MAGENTA << "[ESTACION 4] Creando estación" << std::endl;
     std::ifstream i("params.json");
     json config;
     i >> config;
 
-    // Create queue for CADENA_3
-    std::cout << "[ESTACION 4] Creando cadena de traslado entre estaciones 3 y 4\n";
-    std::string queue_name_3 = config["queues"]["cadena_3"];
-    int msgid_3 = create_msg_queue(queue_name_3[0]);
+    // Create queues
+    std::cout << "[ESTACION 4] Creando cadena de traslado entre estaciones 3 y 4" << std::endl;
+    msgid_3 = create_msg_queue(config["queues"]["cadena_3"]);
 
-    double mean{config["station_4"]["mean"]}, deviation{config["station_4"]["deviation"]};
-    std::normal_distribution<double> norm{get_normal_dist_object(mean, deviation)};
+    std::cout << "[ESTACION 4] Creando cadena de información del supervisor" << std::endl;
+    supervisor_queue_id = create_msg_queue(config["queues"]["supervisor"]);
 
-    std::cout << "[ESTACION 4] Valor de media: " << mean << std::endl;
-    std::cout << "[ESTACION 4] Valor de desviacion estandar: " << deviation << std::endl;
-
-    ProductionCard pcard;
-
+    // POP cars from the queue
     int seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
 
-    std::uniform_int_distribution<int> seat_dist{0, 1};
+    std::normal_distribution<double> norm{ get_normal_dist_object(config["station_4"]["mean"], config["station_4"]["deviation"]) };
+    std::cout << "[ESTACION 4] Valor de media: " << norm.mean() << std::endl;
+    std::cout << "[ESTACION 4] Valor de desviacion estandar: " << norm.stddev() << std::endl;
 
-    while (true)
-    {
-        std::cout << "[ESTACION 4] Aguardando por vehículo en cola." << std::endl;
+    std::uniform_int_distribution<int> seat_dist{ 0, 1 };
 
-        ssize_t data = msgrcv(msgid_3, &pcard, sizeof(pcard), 1, 0);
-        if (data == 0)
-        {
-            std::cout << "[ESTACION 4] No hay vehículos en cola. " << std::endl;
-            std::this_thread::sleep_for(200ms);
-            continue;
-        }
+    QueueMessage msg;
+    while (true) {
+        ssize_t data = msgrcv(msgid_3, &msg, sizeof(msg.mtext), 1, 0);
 
-        if (data < 0)
-        {
+        if (data < 0) {
             perror("[ESTACION 4] error receiving message");
+            kill(getpid(), SIGINT);
             exit(1);
         }
+        ProductionCard& pcard{ msg.mtext };
+
+        std::cout << "[ESTACION 4] ----- Nuevo automóvil: " << pcard.car_id << " -----" << std::endl;
 
         std::chrono::duration<double> period(norm(generator));
 
-        std::cout << "[ESTACION 4] Automovil " << pcard.car_id << " colocando muebles y demás componentes" << std::endl;
-        std::cout << "[ESTACION 4] Tiempo estimado " << period.count() << std::endl;
+        std::cout << "[ESTACION 4] Notificando al supervisor." << std::endl;
+        pcard.station = 4;
+        if (msgsnd(supervisor_queue_id, &msg, sizeof(msg.mtext), 0) < 0) {
+            perror("[ESTACION 4] sending card to supervisor");
+            kill(getpid(), SIGINT);
+            exit(1);
+        }
+
+        std::cout << "[ESTACION 4] automóvil colocando muebles y demás componentes" << std::endl;
+        std::cout << "[ESTACION 4] Tiempo estimado: " << period.count() << std::endl;
 
         std::this_thread::sleep_for(period);
 
         // Add car seat type
         pcard.seat_type = (CarSeatType)(seat_dist(generator));
-        std::cout << "[ESTACION 4] El asiento del automovil " << pcard.car_id << " es: " << CAR_SEAT_TYPE_STR[pcard.seat_type] << std::endl;
+        std::cout << "[ESTACION 4] Asientos asignado al automóvil: " << CAR_SEAT_TYPE_STR[pcard.seat_type] << std::endl;
+
+        pcard.finalizado = true;
+        std::cout << "[ESTACION 4] automóvil finalizado, notificando al supervisor..." << std::endl;
+        if (msgsnd(supervisor_queue_id, &msg, sizeof(msg.mtext), 0) < 0) {
+            perror("[ESTACION 4] sending finished card to supervisor");
+            kill(getpid(), SIGINT);
+            exit(1);
+        }
     }
 
     return 0;
