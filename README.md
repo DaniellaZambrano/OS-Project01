@@ -35,6 +35,7 @@ al sistema:
     - `station_2.exe`
     - `station_3.exe`
     - `station_4.exe`
+    - `supervisor.exe`
 
 
 ### Instrucciones para ejecutar el código
@@ -44,6 +45,8 @@ al sistema:
     - `station_2.exe`
     - `station_3.exe`
     - `station_4.exe`
+    - `supervisor.exe`
+
 
 
 Al seguir estos pasos, se podra apreciar a los 5 programas independientes colaborando entre sí para simular la 
@@ -66,3 +69,5 @@ Ahí es posible modificar:
 -----
 
 ### Demo
+
+En este [vídeo](https://youtu.be/79oy5OIM6lA) se encuentra un demo mostrando el proyecto en funcionamiento.
